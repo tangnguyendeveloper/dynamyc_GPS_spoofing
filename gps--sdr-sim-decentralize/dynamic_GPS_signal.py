@@ -170,6 +170,35 @@ def GenerateDynamicGPSsignal(start_lo, leap):
     f.close()
 
 
+def GenerateDynamicGPSsignal(list_point):
+
+    alpha = 1
+    duration = int((360/alpha)*list_point.shape[0])*3
+    time_slot = 0
+
+    f = open("dynamic_point.csv", "w")
+    writer = csv.writer(f)
+
+    for point in list_point:
+
+        current_location = Location(latitude=point[0], longitude=point[1], height=point[2], r=1e-2)
+        current_location.GeneratePoint(alpha)
+        c_point = current_location.list_point
+        n_point_of_axis = int(c_point.shape[0]/3)
+
+        for i in range(n_point_of_axis):
+            for axis in range(3):
+                p = c_point[i+(axis*n_point_of_axis)]
+                x, y, z = geodetic2ecef(p[0], p[1], p[2])
+                p = np.array([time_slot / 10, x, y, z])
+                writer.writerow(p)
+                time_slot += 1
+
+                print(f"\033[A\033[AGenerating {duration} time slot \n Location Point ...", p)
+
+    f.close()
+
+
 if __name__=="__main__":
 
     #ShowGlobular()
@@ -177,10 +206,24 @@ if __name__=="__main__":
     
     print("Please wait...\n")
 
-    leap = 1e3 #1e-3 * 1e6
-    start_lo = np.array([49.035618, 31.322188, 100.0])*1e6
-    GenerateDynamicGPSsignal(start_lo, leap)
+    #leap = 1e3 #1e-3 * 1e6
+    #start_lo = np.array([15.192679, 100.843230, 50.0])*1e6
+    #GenerateDynamicGPSsignal(start_lo, leap)
     
+    list_point = np.array([
+        [10.869775, 106.803807, 20.0],
+        [10.870015, 106.802561, 20.0],
+        [10.870437, 106.802089, 20.0],
+        [10.871196, 106.802477, 20.0],
+        [10.871860, 106.802799, 20.0],
+        [10.872819, 106.802842, 20.0],
+        [10.873620, 106.802660, 20.0],
+        [10.873872, 106.801405, 20.0],
+        [10.874894, 106.801448, 20.0],
+        [10.875315, 106.800708, 20.0]
+    ])
+
+    GenerateDynamicGPSsignal(list_point)
     
     subprocess.run(["../LimeGPS",
         "-e", "../../brdc3000.22n",
