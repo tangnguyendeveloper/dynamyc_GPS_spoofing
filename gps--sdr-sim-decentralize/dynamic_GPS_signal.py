@@ -94,7 +94,7 @@ class Location:
 
 
 def GetDateTime():
-    utcTimeDelta = datetime.timedelta(hours=0)
+    utcTimeDelta = datetime.timedelta(hours=7)
     utcTZObject = datetime.timezone(utcTimeDelta, name="utc")
     d1 = datetime.datetime.now(utcTZObject)
     
@@ -151,7 +151,7 @@ def GenerateDynamicGPSsignal(start_lo, leap):
 
     for i in range(0, num_Leap):
         current = (start_lo + (leap*i)) / 1e6
-        current_location = Location(latitude=current[0], longitude=current[1], height=current[2])
+        current_location = Location(latitude=current[0], longitude=current[1], height=current[2], r=1e-2)
         current_location.GeneratePoint(alpha)
 
         list_point = current_location.list_point
@@ -177,13 +177,13 @@ if __name__=="__main__":
     
     print("Please wait...\n")
 
-    leap = 1e2 #1e-4 * 1e6
-    start_lo = np.array([38.904792, -77.040408 , 50.0])*1e6
+    leap = 1e3 #1e-3 * 1e6
+    start_lo = np.array([49.035618, 31.322188, 100.0])*1e6
     GenerateDynamicGPSsignal(start_lo, leap)
     
     
     subprocess.run(["../LimeGPS",
-        "-e", "../../brdc2990.22n",
+        "-e", "../../brdc3000.22n",
         "-u", "dynamic_point.csv",
         "-T", GetDateTime(),
         "-a", "1.0"
